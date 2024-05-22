@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Simulation</title>
+</head>
+<body>
+    <button id="loginButton">Login</button>
+    <p id="cookieStatus">Cookies: </p>
+
+    <script>
+        document.getElementById('loginButton').addEventListener('click', async () => {
+            const username = 'geremoraint@gmail.com';
+            const organizationId = 'your-organization-id';
+            const token = 'secret_token';
+            
+            const requestData = {
+                username,
+                organizationId,
+                token
+            };
+
+            try {
+                const response = await fetch('https://cors-anywhere.herokuapp.com/https://adhoc3.catalog.materialbank.com/identity/api/v1/auth-user-session/request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData),
+                    credentials: 'include' // Include credentials to allow cookies
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Error response text:', errorText);
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new TypeError(`Expected JSON, but received ${contentType}`);
+                }
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Login successful and cookies set.');
+                    checkCookies();
+                } else {
+                    alert('Login failed: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred: ' + error.message);
+            }
+        });
+
+        function checkCookies() {
+            // This will only check non-httpOnly cookies
+            const cookies = document.cookie;
+            document.getElementById('cookieStatus').innerText = 'Cookies: ' + cookies;
+        }
+
+        // Check cookies on page load
+        checkCookies();
+    </script>
+</body>
+</html>
